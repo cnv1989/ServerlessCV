@@ -5,10 +5,6 @@ venv() {
   virtualenv -p python3 env
 }
 
-package() {
-  lambda_reqs
-}
-
 deploy_lambda() {
   lambda_reqs
   AWS_ACCOUNT_ID=`env/bin/aws sts get-caller-identity --output text --query 'Account'`
@@ -24,16 +20,17 @@ build_website() {
 }
 
 environment_reqs() {
-  env/bin/pip install -r env_requirements.txt
+  env/bin/pip install -r env_requirements.txt --upgrade
 }
 
 lambda_reqs() {
-  env/bin/pip install -r lambda_requirements.txt -t lambda/requirements/
+  env/bin/pip install -r lambda_requirements.txt -t lambda/requirements/ --upgrade
 }
 
 deploy_stack() {
   env/bin/aws cloudformation deploy --template cfn-template.yml --stack-name DLApp --capabilities CAPABILITY_NAMED_IAM
   env/bin/aws cloudformation describe-stacks --stack-name DLApp > src/StackOutput.json
+  env/bin/aws cloudformation describe-stacks --stack-name DLApp > lambda/StackOutput.json
 }
 
 deploy_website() {
@@ -52,7 +49,7 @@ deploy() {
 setup() {
   venv
   environment_reqs
-  node_reqs
+  lambda_reqs
 }
 
 case $1 in
@@ -67,6 +64,9 @@ case $1 in
     ;;
   deploy_website)
     deploy_website
+    ;;
+  lambda_reqs)
+    lambda_reqs
     ;;
   setup)
     setup

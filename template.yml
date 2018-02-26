@@ -6,9 +6,9 @@ Resources:
   ResizeImage:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: lambda.resize_image
+      Handler: image_processing.resize_image
       Runtime: python3.6
-      CodeUri: ./lambda/
+      CodeUri: lambda/
       Timeout: 300
       Role: !Join ['', ['arn:aws:iam::', !Ref 'AWS::AccountId', ':role/LambdaExecutionRole']]
       Events:

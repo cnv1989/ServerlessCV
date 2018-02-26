@@ -8,12 +8,14 @@
     "start": "webpack-dev-server -d --hot --inline --progress --colors",
     "build": "webpack --progress --colors",
     "gulp": "gulp",
-    "watch": "gulp watch"
+    "watch": "gulp watch",
+    "sam": "sam"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.202.0",
+    "crypto-js": "^3.1.9-1",
     "react": "^16.1.1",
     "react-d3-basic": "^1.6.11",
     "react-dom": "^16.1.1",
@@ -21,6 +23,7 @@
     "uuid4": "^1.0.0"
   },
   "devDependencies": {
+    "aws-sam-local": "^0.2.7",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",

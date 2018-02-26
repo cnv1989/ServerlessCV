@@ -1,6 +1,7 @@
 import uuid4 from 'uuid4';
 import AWS from 'aws-sdk';
 import StackOutput from '../StackOutput';
+import SHA256 from 'crypto-js/sha256';
 
 
 const getValue = key => (
