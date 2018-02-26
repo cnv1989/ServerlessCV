@@ -1,0 +1,6 @@
+src/StackOutput.json
+node_modules/
+dist/
+package-lock.json
+env/
+lambda-template-export.yml

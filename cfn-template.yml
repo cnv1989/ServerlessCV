@@ -1,0 +1,185 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+
+  ImageStore:
+    Type: AWS::S3::Bucket
+    Properties:
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ['*']
+            AllowedMethods: [GET, POST, PUT, DELETE, HEAD]
+            AllowedOrigins: ['*']
+            ExposedHeaders: [Date]
+            MaxAge: '3600'
+
+  Website:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Join ['-', ['website', !Ref 'AWS::AccountId']]
+      # AccessControl: PublicRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+
+  LambdaCodeStore:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Join ['-', ['lambdacodestore', !Ref 'AWS::AccountId']]
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: DLAppUserPool
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+        GenerateSecret: False
+        RefreshTokenValidity: 30
+        UserPoolId: !Ref UserPool
+
+  IdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      AllowUnauthenticatedIdentities: True
+      CognitoIdentityProviders:
+        - ClientId: !Ref UserPoolClient
+          ProviderName: !GetAtt UserPool.ProviderName
+
+  CognitoUnauthRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub Cognito_${IdentityPool.Name}_Unauth_Role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: [ 'sts:AssumeRoleWithWebIdentity' ]
+            Condition:
+              StringEquals:
+                "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
+              "ForAnyValue:StringLike":
+                "cognito-identity.amazonaws.com:amr": unauthenticated
+      Policies:
+        - PolicyName: cognitounauth
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                - mobileanalytics:PutEvents
+                - cognito-sync:*
+                - execute-api:*
+                Resource:
+                - "*"
+        - PolicyName: cognitounauths3access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "s3:*"
+                Resource:
+                  - !Join ['', ['arn:aws:s3:::', !Ref 'ImageStore', /*]]
+
+  CognitoAuthRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub Cognito_${IdentityPool.Name}_Auth_Role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: [ 'sts:AssumeRole' ]
+      Policies:
+        - PolicyName: cognitoauth
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                - mobileanalytics:PutEvents
+                - cognito-sync:*
+                - execute-api:*
+                Resource:
+                - "*"
+  IdentityPoolRoleAttachment:
+    DependsOn: [ IdentityPool, CognitoUnauthRole, CognitoAuthRole ]
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId: !Ref IdentityPool
+      Roles:
+        authenticated: !GetAtt CognitoAuthRole.Arn
+        unauthenticated: !GetAtt CognitoUnauthRole.Arn
+  LambdaExecutionRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: LambdaExecutionRole
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: sts:AssumeRole
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+
+        Policies:
+          - PolicyName: LambdaExecution
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource:
+                    - Fn::Join:
+                      - ':'
+                      -
+                        - 'arn:aws:logs'
+                        - Ref: AWS::Region
+                        - Ref: AWS::AccountId
+                        - 'log-group:/aws/lambda/*:*:*'
+
+                - Effect: Allow
+                  Action:
+                    - ec2:CreateNetworkInterface
+                    - ec2:DescribeNetworkInterfaces
+                    - ec2:DetachNetworkInterface
+                    - ec2:DeleteNetworkInterface
+                  Resource: '*'
+                - Effect: Allow
+                  Action:
+                    - lambda:InvokeFunction
+                  Resource: "arn:aws:lambda:*:*:*:*"
+
+Outputs:
+  ImageStore:
+    Description: "S3 bucket for storing uploaded images"
+    Value: !Ref ImageStore
+  Website:
+    Description: "S3 bucket for hosting static website"
+    Value: !Ref Website
+  WebsiteURL:
+    Description: "URL for website hosted on S3"
+    Value: !GetAtt [Website, WebsiteURL]
+  WebsiteBucketSecureURL:
+    Description: Name of S3 bucket to hold website content
+    Value: !Join ['', ['https://', !GetAtt [Website, DomainName]]]
+  UserPool:
+    Description: "User pool ID"
+    Value: !Ref UserPool
+  IdentityPool:
+    Description: "Identity pool ID"
+    Value: !Ref IdentityPool
+  ClientId:
+    Description: "Client id for the user pool appclient"
+    Value: !Ref UserPoolClient
+  LambdaExecutionRole:
+    Description: "IAM Role for executing Lambda funtions"
+    Value: !Ref LambdaExecutionRole
