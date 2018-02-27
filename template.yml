@@ -6,7 +6,7 @@ Resources:
   ResizeImage:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: image_processing.resize_image
+      Handler: image_processing.classify_image
       Runtime: python3.6
       CodeUri: lambda/
       Timeout: 300

@@ -4,3 +4,5 @@ dist/
 package-lock.json
 env/
 lambda-template-export.yml
+lambda/requirements/*
+~!lambda/requimrents/__init__.py

@@ -13,9 +13,12 @@ deploy_lambda() {
   env/bin/aws cloudformation deploy --template lambda-template-export.yml --stack-name DLAppLambdas --capabilities CAPABILITY_IAM
 }
 
+node_reqs() {
+  npm install
+}
 
 build_website() {
-  npm install
+  node_reqs
   npm run gulp build
 }
 
@@ -44,6 +47,12 @@ deploy() {
   deploy_stack
   deploy_lambda
   deploy_website
+}
+
+clean() {
+  rm -rf node_modules
+  rm -rf lambda/requirements/*
+  touch lambda/requirements/__init__.py
 }
 
 setup() {
