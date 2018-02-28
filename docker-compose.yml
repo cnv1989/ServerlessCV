@@ -1,0 +1,7 @@
+version: '3'
+services:
+  lambda-local:
+    build:
+      context: .
+    volumes:
+      - .:/app

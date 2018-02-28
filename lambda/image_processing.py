@@ -18,6 +18,7 @@ S3_BUCKET = list(filter(
         json.load(open('./StackOutput.json'))["Stacks"][0]["Outputs"]
     ))[0]["OutputValue"]
 
+
 def classify_image(event, context):
     key = json.loads(event.get('body'))["image_name"]
     obj = s3.Object(S3_BUCKET, key)
