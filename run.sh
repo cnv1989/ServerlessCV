@@ -1,13 +1,23 @@
 #!/bin/bash
+
+venv() {
+  pip install virtualenv
+  virtualenv -p python3 env
+}
+
+build_lambda() {
+  docker-compose up && docker-compose down
+}
+
 deploy_lambda() {
-  lambda_reqs
-  AWS_ACCOUNT_ID=`aws sts get-caller-identity --output text --query 'Account'`
+  AWS_ACCOUNT_ID=`env/bin/aws sts get-caller-identity --output text --query 'Account'`
   S3_BUCKET="lambdacodestore-$AWS_ACCOUNT_ID"
-  aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template lambda-template-export.yml
-  aws cloudformation deploy --template lambda-template-export.yml --stack-name DLAppLambdas --capabilities CAPABILITY_IAM
+  env/bin/aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template lambda-template-export.yml
+  env/bin/aws cloudformation deploy --template lambda-template-export.yml --stack-name DLAppLambdas --capabilities CAPABILITY_IAM
 }
 
 node_reqs() {
+  rm -rf node_modules
   npm install
 }
 
@@ -17,24 +27,30 @@ build_website() {
 }
 
 environment_reqs() {
-  pip install -r env_requirements.txt --upgrade
+  env/bin/pip install -r env_requirements.txt --upgrade
 }
 
 lambda_reqs() {
-  pip install -r lambda_requirements.txt -t lambda/requirements/ --upgrade
+  rm -rf image_processing/requirements/*
+  touch image_processing/requirements/__init__.py
+  pip install -r image_processing/requirements.txt -t image_processing/requirements/ --upgrade
+  rm -rf yolo/requirements/*
+  touch yolo/requirements/__init__.py
+  pip install -r yolo/requirements.txt -t yolo/requirements/ --upgrade
 }
 
 deploy_stack() {
-  aws cloudformation deploy --template cfn-template.yml --stack-name DLApp --capabilities CAPABILITY_NAMED_IAM
-  aws cloudformation describe-stacks --stack-name DLApp > src/StackOutput.json
-  aws cloudformation describe-stacks --stack-name DLApp > lambda/StackOutput.json
+  env/bin/aws cloudformation deploy --template cfn-template.yml --stack-name DLApp --capabilities CAPABILITY_NAMED_IAM
+  env/bin/aws cloudformation describe-stacks --stack-name DLApp > src/StackOutput.json
+  env/bin/aws cloudformation describe-stacks --stack-name DLApp > image_processing/StackOutput.json
+  env/bin/aws cloudformation describe-stacks --stack-name DLApp > yolo/StackOutput.json
 }
 
 deploy_website() {
-  AWS_ACCOUNT_ID=`aws sts get-caller-identity --output text --query 'Account'`
+  AWS_ACCOUNT_ID=`env/bin/aws sts get-caller-identity --output text --query 'Account'`
   S3_BUCKET="website-$AWS_ACCOUNT_ID"
   build_website
-  aws s3 cp ./dist/ s3://$S3_BUCKET/ --recursive
+  env/bin/aws s3 cp ./dist/ s3://$S3_BUCKET/ --recursive
 }
 
 deploy() {
@@ -43,15 +59,9 @@ deploy() {
   deploy_website
 }
 
-clean() {
-  rm -rf node_modules
-  rm -rf lambda/requirements/*
-  touch lambda/requirements/__init__.py
-}
-
 setup() {
+  venv
   environment_reqs
-  lambda_reqs
 }
 
 case $1 in
@@ -69,6 +79,9 @@ case $1 in
     ;;
   lambda_reqs)
     lambda_reqs
+    ;;
+  build_lambda)
+    build_lambda
     ;;
   setup)
     setup

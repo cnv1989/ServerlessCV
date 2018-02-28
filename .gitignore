@@ -4,5 +4,7 @@ dist/
 package-lock.json
 env/
 lambda-template-export.yml
-lambda/requirements/*
-~!lambda/requimrents/__init__.py
+image_processing/requirements/*
+~!image_processing/requirements/__init__.py
+yolo/requirements/*
+~!iyolo/requirements/__init__.py

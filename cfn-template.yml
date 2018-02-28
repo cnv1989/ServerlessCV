@@ -157,6 +157,11 @@ Resources:
                   Action:
                     - lambda:InvokeFunction
                   Resource: "arn:aws:lambda:*:*:*:*"
+                - Effect: Allow
+                  Action:
+                    - "s3:*"
+                  Resource:
+                    - !Join ['', ['arn:aws:s3:::', !Ref 'ImageStore', /*]]
 
 Outputs:
   ImageStore:

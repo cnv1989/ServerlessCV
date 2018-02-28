@@ -6,9 +6,25 @@ Resources:
   ResizeImage:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: image_processing.classify_image
-      Runtime: python3.6
-      CodeUri: lambda/
+      Handler: process.handler
+      Runtime: python2.7
+      CodeUri: image_processing/
+      Timeout: 300
+      Role: !Join ['', ['arn:aws:iam::', !Ref 'AWS::AccountId', ':role/LambdaExecutionRole']]
+      Events:
+        ResizeImage:
+            Type: Api
+            Properties:
+                Path: '/image/resize'
+                Method: post
+
+  Yolo:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: 'Yolo'
+      Handler: classify_image.handler
+      Runtime: python2.7
+      CodeUri: yolo/
       Timeout: 300
       Role: !Join ['', ['arn:aws:iam::', !Ref 'AWS::AccountId', ':role/LambdaExecutionRole']]
       Events:

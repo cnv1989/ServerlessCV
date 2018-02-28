@@ -5,3 +5,5 @@ services:
       context: .
     volumes:
       - .:/app
+    command:
+      bash run.sh lambda_reqs
