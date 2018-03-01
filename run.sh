@@ -52,6 +52,9 @@ lambda_reqs() {
     if [ -d "google" ]; then
       touch google/__init__.py
     fi
+    if [ -d "tensorboard" ]; then
+      rm -rf tensorboard
+    fi
     popd
     popd
   done

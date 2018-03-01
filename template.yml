@@ -10,6 +10,7 @@ Resources:
       Runtime: python2.7
       CodeUri: lambdas/image_processing/
       Timeout: 300
+      MemorySize: 3008
       Role: !Join ['', ['arn:aws:iam::', !Ref 'AWS::AccountId', ':role/LambdaExecutionRole']]
       Events:
         ResizeImage:
@@ -26,4 +27,5 @@ Resources:
       Runtime: python2.7
       CodeUri: lambdas/yolo/
       Timeout: 300
+      MemorySize: 3008
       Role: !Join ['', ['arn:aws:iam::', !Ref 'AWS::AccountId', ':role/LambdaExecutionRole']]
