@@ -47,29 +47,18 @@ lambda_reqs() {
   find . -name \*.pyc -delete
   popd
   popd
-  pushd yolo
-  rm -rf requirements/*
-  touch requirements/__init__.py
-  pip install -r requirements.txt -t requirements/ --upgrade
-  pushd requirements
-  rm -r external
-  find -name "*.so" | xargs strip
-  find -name "*.so.*" | xargs strip
-  rm -r pip
-  rm -r pip-9.0.1.dist-info
-  rm -r wheel
-  rm -r wheel-0.30.0.dist-info
-  rm easy_install.py
-  find . -name \*.pyc -delete
-  popd
-  popd
 }
 
 deploy_stack() {
   env/bin/aws cloudformation deploy --template cfn-template.yml --stack-name DLApp --capabilities CAPABILITY_NAMED_IAM
   env/bin/aws cloudformation describe-stacks --stack-name DLApp > src/StackOutput.json
   env/bin/aws cloudformation describe-stacks --stack-name DLApp > image_processing/StackOutput.json
-  env/bin/aws cloudformation describe-stacks --stack-name DLApp > yolo/StackOutput.json
+}
+
+deploy_models() {
+  AWS_ACCOUNT_ID=`env/bin/aws sts get-caller-identity --output text --query 'Account'`
+  S3_BUCKET="dlmodelstore-$AWS_ACCOUNT_ID"
+  env/bin/aws s3 cp ./models/ s3://$S3_BUCKET/ --recursive
 }
 
 deploy_website() {
@@ -102,6 +91,9 @@ case $1 in
     ;;
   deploy_website)
     deploy_website
+    ;;
+  deploy_models)
+    deploy_models
     ;;
   lambda_reqs)
     lambda_reqs

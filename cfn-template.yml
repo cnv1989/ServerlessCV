@@ -25,6 +25,11 @@ Resources:
     Properties:
       BucketName: !Join ['-', ['lambdacodestore', !Ref 'AWS::AccountId']]
 
+  DLModelStore:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Join ['-', ['dlmodelstore', !Ref 'AWS::AccountId']]
+
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
@@ -167,6 +172,9 @@ Outputs:
   ImageStore:
     Description: "S3 bucket for storing uploaded images"
     Value: !Ref ImageStore
+  DLModelStore:
+    Description: "S3 bucket for storing deep learning models"
+    Value: !Ref DLModelStore
   Website:
     Description: "S3 bucket for hosting static website"
     Value: !Ref Website

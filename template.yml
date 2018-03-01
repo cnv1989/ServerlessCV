@@ -18,12 +18,3 @@ Resources:
                 Path: '/image/resize'
                 Method: post
 
-  Yolo:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: 'Yolo'
-      Handler: classify_image.handler
-      Runtime: python2.7
-      CodeUri: yolo/
-      Timeout: 300
-      Role: !Join ['', ['arn:aws:iam::', !Ref 'AWS::AccountId', ':role/LambdaExecutionRole']]
