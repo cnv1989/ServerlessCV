@@ -40,6 +40,7 @@ export const STATUS = {
 
 
 export const uploadFiles = dispatch => {
+
     return files => {
         files.map((file, index) => {
             const hash = uuid4();
@@ -65,6 +66,27 @@ export const uploadFiles = dispatch => {
                     hash: hash,
                     s3Url: data.Location
                 });
+                return data;
+
+            }).then( (upload_response) => {
+                console.log(upload_response);
+                dispatch({
+                    type: IMAGE_ACTIONS.CLASSIFY_IMAGE,
+                    hash: hash
+                });
+                fetch('https://hp4t5usv1a.execute-api.us-west-2.amazonaws.com/Stage/image/process', {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        image_name: file.name
+                    })
+                }).then((res) => (res.json())).then( (res_data) => {
+                    console.log(res_data);
+                    dispatch({
+                        type: IMAGE_ACTIONS.CLASSIFY_COMPLETED,
+                        hash: hash
+                    });
+                })
             });
         });
     }

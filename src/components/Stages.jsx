@@ -57,7 +57,7 @@ const ImageThumbnail = ({image, status, stage}) => {
                         display: 'inline-block',
                     }
                 }>
-                    <img src={image.file.preview} style={{height: 100}}/>
+                    <img src={image.file.preview} style={{height: 400}}/>
                 </Paper>
             ):
             null}
@@ -85,15 +85,9 @@ const ImageProcessingStages = props => {
                     </StepContent>
                 </Step>
                 <Step active={true}>
-                    <StepLabel><h3>Resizing Image(s)</h3></StepLabel>
-                    <StepContent>
-                        <Stage images={props.images.filter(image => image.upload_status === STATUS.COMPLETED)} status='resize_status' stage='resizing'/>
-                    </StepContent>
-                </Step>
-                <Step active={true}>
                     <StepLabel><h3>Classifying Image(s)</h3></StepLabel>
                     <StepContent>
-                        <Stage images={props.images.filter(image => image.resize_status === STATUS.COMPLETED)} status='classify_status' stage='classifying'/>
+                        <Stage images={props.images.filter(image => image.upload_status === STATUS.COMPLETED)} status='classify_status' stage='classifying'/>
                     </StepContent>
                 </Step>
                 <Step active={true}>

@@ -11,7 +11,6 @@ const images = (state = [], action) => {
                 hash: action.hash,
                 s3Url: null,
                 upload_status: STATUS.STARTED,
-                resize_status: STATUS.NOT_STARTED,
                 classify_status: STATUS.NOT_STARTED,
                 labels: []
             }
@@ -23,23 +22,9 @@ const images = (state = [], action) => {
                 }
                 return image;
             });
-        case IMAGE_ACTIONS.RESIZE_IMAGE:
-            return state.map((image, index) => {
-                if (image.upload_status === STATUS.COMPLETED && image.hash === action.hash) {
-                    return {...image, resize_status: STATUS.STARTED}
-                }
-                return image;
-            });
-        case IMAGE_ACTIONS.RESIZE_COMPLETED:
-            return state.map((image, index) => {
-                if (image.resize_status === STATUS.STARTED && image.hash === action.hash) {
-                    return {...image, resize_status: STATUS.COMPLETED}
-                }
-                return image;
-            });
         case IMAGE_ACTIONS.CLASSIFY_IMAGE:
             return state.map((image, index) => {
-                if (image.resize_status === STATUS.COMPLETED && image.hash === action.hash) {
+                if (image.upload_status === STATUS.COMPLETED && image.hash === action.hash) {
                     return {...image, classify_status: STATUS.STARTED}
                 }
                 return image;

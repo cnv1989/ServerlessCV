@@ -16,7 +16,7 @@ Resources:
         ResizeImage:
             Type: Api
             Properties:
-                Path: '/image/process'
+                Path: '/process_image'
                 Method: post
 
   Yolo:
