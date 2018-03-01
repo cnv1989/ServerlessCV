@@ -23,8 +23,10 @@ MODELS = {
 logger = logging.getLogger(__name__)
 logger.setLevel('DEBUG')
 
+boto3.setup_default_session(region_name='us-west-2')
 s3 = boto3.resource('s3')
 s3_client = boto3.client('s3')
+lambda_client = boto3.client('lambda')
 
 S3_BUCKET = list(filter(
         lambda output: output.get('OutputKey') == 'ImageStore',
@@ -54,24 +56,33 @@ def handler(event, context):
         'image_data': image_data.tolist(),
         'image_size': image.size
     }
-    s3.Object(S3_BUCKET, 'yolo-{}.json'.format(image_name)).put(
+    json_file = 'yolo-{}.json'.format(image_name)
+    s3.Object(S3_BUCKET, json_file).put(
         Body=(bytes(json.dumps(payload, indent=2).encode('UTF-8')))
     )
-    return {
-        'statusCode': 200,
-        'body': json.dumps({
-            'image_name': image_name
-        })
-    }
 
-    # obj_classes = open('./coco_classes.txt', 'r').readlines()
-    # obj_classes = list(map(lambda cls: cls.strip(), obj_classes))
-    # colors = generate_colors(obj_classes)
-    # draw_boxes(image, out_scores, out_boxes, out_classes, obj_classes, colors)
+    invoke_response = lambda_client.invoke(
+        FunctionName="Yolo",
+        InvocationType='RequestResponse',
+        Payload=json.dumps({
+            "image_name": image_name,
+            "json_file": json_file
+        }).encode()
+    )
 
-    # out_image.save(image_output_path, quality=90)
-    # s3_client.upload_file(image_output_path, S3_BUCKET, out_image_name)
+    response = json.loads(invoke_response['Payload'].read())
 
+    boxes = np.array(response["boxes"])
+    scores = np.array(response["scores"])
+    classes = np.array(response["classes"])
+
+    obj_classes = open('./coco_classes.txt', 'r').readlines()
+    obj_classes = list(map(lambda cls: cls.strip(), obj_classes))
+    colors = generate_colors(obj_classes)
+    draw_boxes(image, scores, boxes, classes, obj_classes, colors)
+
+    image.save(image_output_path, quality=90)
+    s3_client.upload_file(image_output_path, S3_BUCKET, out_image_name)
     return {
         'statusCode': 200,
         'body': json.dumps({
