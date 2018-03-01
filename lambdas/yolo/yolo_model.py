@@ -2,30 +2,11 @@ import sys
 sys.path.insert(0,'./requirements')
 
 import boto3
-import imghdr
-import io
 import json
-import logging
 import numpy as np
 import os
-
-
-import imghdr
 import tensorflow as tf
 
-from PIL import Image
-from yolo_utils import *
-
-
-MODELS = {
-    'YOLO': {
-        'functionName': 'Yolo',
-        'image_size': (608, 608)
-    }
-}
-
-logger = logging.getLogger(__name__)
-logger.setLevel('DEBUG')
 
 s3 = boto3.resource('s3')
 s3_client = boto3.client('s3')
@@ -46,34 +27,20 @@ DL_S3_BUCKET = list(filter(
 s3.Bucket(DL_S3_BUCKET).download_file('yolo_tf.pb', MODEL_LOCAL_PATH)
 
 
-def handler(event, context):
-    bucket = s3.Bucket(S3_BUCKET)
-    image_name = json.loads(event.get('body'))["image_name"]
-    image_obj = bucket.Object(image_name)
-    file_stream = io.BytesIO()
-    out_image_name = "classified-{}".format(image_name)
-    image_output_path = os.path.join(os.sep, 'tmp', out_image_name)
-    image_obj.download_fileobj(file_stream)
-    pil_image = Image.open(file_stream)
-    out_image = eval_image(pil_image)
-    out_image.save(image_output_path, quality=90)
-    s3_client.upload_file(image_output_path, S3_BUCKET, out_image_name)
+def classify(event, context):
+    json_file = event["json_file"]
 
+    content_object = s3.Object(S3_BUCKET, json_file)
+    file_content = content_object.get()['Body'].read().decode('utf-8')
+    json_content = json.loads(file_content)
+    image_data = np.array(json_content['image_data'])
+    image_size = json_content['image_size']
+    scores, boxes, classes = eval_image(image_data, image_size)
     return {
-        'statusCode': 200,
-        'body': json.dumps({
-            'image_name': image_name,
-            'classified_image_name': out_image_name
-        })
+        'scores': scores.tolist(),
+        'boxes': boxes.tolist(),
+        'classes': classes.tolist()
     }
-
-
-def preprocess_image(image, model_image_size):
-    resized_image = image.resize(tuple(reversed(model_image_size)), Image.BICUBIC)
-    image_data = np.array(resized_image, dtype='float32')
-    image_data /= 255.
-    image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
-    return image, image_data
 
 
 def get_grid_indices(output_layer, grid):
@@ -141,6 +108,16 @@ def non_max_suppression(scores, boxes, classes, max_boxes=10, iou_threshold=0.5)
     return scores, boxes, classes
 
 
+def scale_boxes(boxes, image_shape):
+    """ Scales the predicted boxes in order to be drawable on the image"""
+    height = image_shape[0]
+    width = image_shape[1]
+    image_dims = tf.stack([height, width, height, width])
+    image_dims = tf.reshape(image_dims, [1, 4])
+    boxes = boxes * image_dims
+    return boxes
+
+
 def get_boxes(output_layer, anchors, classes, image_shape=(720., 1280.)):
     num_classes = len(classes)
     box_centers, box_dims, box_confidence, box_class_probs = unroll_boxes(output_layer, anchors, num_classes)
@@ -163,13 +140,10 @@ def load_graph(model_file):
     return graph
 
 
-def eval_image(pil_image):
+def eval_image(image_data, image_size):
     obj_classes = open('./coco_classes.txt', 'r').readlines()
     obj_classes = list(map(lambda cls: cls.strip(), obj_classes))
     anchors = [[0.57273, 0.677385], [1.87446, 2.06253], [3.33843, 5.47434], [7.88282, 3.52778], [9.77052, 9.16828]]
-    colors = generate_colors(obj_classes)
-    image, image_data = preprocess_image(pil_image, model_image_size=(608, 608))
-    image_size = image.size
 
     graph = load_graph(MODEL_LOCAL_PATH)
 
@@ -183,7 +157,4 @@ def eval_image(pil_image):
         init_op = tf.global_variables_initializer()
         with tf.Session() as sess:
             sess.run(init_op)
-            [out_scores, out_boxes, out_classes] = sess.run([scores, boxes, classes],
-                                                            feed_dict={input_operation.outputs[0]: image_data})
-            draw_boxes(image, out_scores, out_boxes, out_classes, obj_classes, colors)
-            return image
+            return sess.run([scores, boxes, classes], feed_dict={input_operation.outputs[0]: image_data})

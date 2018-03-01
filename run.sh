@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 venv() {
   pip install virtualenv
   virtualenv -p python3 env
@@ -30,30 +31,40 @@ environment_reqs() {
   env/bin/pip install -r env_requirements.txt --upgrade
 }
 
+LAMBDA_DIRS="image_processing yolo"
+
 lambda_reqs() {
-  pushd dl_lambdas
-  rm -rf requirements/*
-  touch requirements/__init__.py
-  pip install -r requirements.txt -t requirements/ --upgrade
-  pushd requirements
-  rm -r external
-  rm -r pip
-  rm -r pip-9.0.1.dist-info
-  rm -r wheel
-  rm -r wheel-0.30.0.dist-info
-  rm easy_install.py
-  find . -name \*.pyc -delete
-  pushd google
-  touch __init__.py
-  popd
-  popd
+  pushd lambdas
+  for dir in $LAMBDA_DIRS
+  do
+    pushd $dir
+    rm -rf requirements/*
+    touch requirements/__init__.py
+    pip install -r requirements.txt -t requirements/ --upgrade
+    pushd requirements
+    rm -r external
+    rm -r pip
+    rm -r pip-9.0.1.dist-info
+    rm -r wheel
+    rm -r wheel-0.30.0.dist-info
+    rm easy_install.py
+    find . -name \*.pyc -delete
+    if [ -d "google" ]; then
+      touch google/__init__.py
+    fi
+    popd
+    popd
+  done
   popd
 }
 
 deploy_stack() {
   env/bin/aws cloudformation deploy --template cfn-template.yml --stack-name DLApp --capabilities CAPABILITY_NAMED_IAM
   env/bin/aws cloudformation describe-stacks --stack-name DLApp > src/StackOutput.json
-  env/bin/aws cloudformation describe-stacks --stack-name DLApp > dl_lambdas/StackOutput.json
+  for dir in $LAMBDA_DIRS
+  do
+    env/bin/aws cloudformation describe-stacks --stack-name DLApp > lambdas/$dir/StackOutput.json
+  done
 }
 
 deploy_models() {

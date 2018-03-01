@@ -1,11 +1,14 @@
+import sys
+sys.path.insert(0,'./requirements')
+
 import colorsys
-import imghdr
-import os
 import random
-import tensorflow as tf
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+
+from PIL import ImageDraw
+from PIL import ImageFont
+
 
 def read_classes(classes_path):
     with open(classes_path) as f:
@@ -13,12 +16,14 @@ def read_classes(classes_path):
     class_names = [c.strip() for c in class_names]
     return class_names
 
+
 def read_anchors(anchors_path):
     with open(anchors_path) as f:
         anchors = f.readline()
         anchors = [float(x) for x in anchors.split(',')]
         anchors = np.array(anchors).reshape(-1, 2)
     return anchors
+
 
 def generate_colors(class_names):
     hsv_tuples = [(x / len(class_names), 1., 1.) for x in range(len(class_names))]
@@ -29,27 +34,10 @@ def generate_colors(class_names):
     random.seed(None)  # Reset seed to default.
     return colors
 
-def scale_boxes(boxes, image_shape):
-    """ Scales the predicted boxes in order to be drawable on the image"""
-    height = image_shape[0]
-    width = image_shape[1]
-    image_dims = tf.stack([height, width, height, width])
-    image_dims = tf.reshape(image_dims, [1, 4])
-    boxes = boxes * image_dims
-    return boxes
-
-def preprocess_image(img_path, model_image_size):
-    image_type = imghdr.what(img_path)
-    image = Image.open(img_path)
-    resized_image = image.resize(tuple(reversed(model_image_size)), Image.BICUBIC)
-    image_data = np.array(resized_image, dtype='float32')
-    image_data /= 255.
-    image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
-    return image, image_data
 
 def draw_boxes(image, out_scores, out_boxes, out_classes, class_names, colors):
-
-    font = ImageFont.truetype(font='font/FiraMono-Medium.otf',size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
+    font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
+                              size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness = (image.size[0] + image.size[1]) // 300
 
     for i, c in reversed(list(enumerate(out_classes))):

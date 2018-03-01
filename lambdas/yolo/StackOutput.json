@@ -1,0 +1,67 @@
+{
+    "Stacks": [
+        {
+            "StackId": "arn:aws:cloudformation:us-west-2:762817779995:stack/DLApp/41fb3b50-1a5b-11e8-a1f4-503f20f2adae",
+            "StackName": "DLApp",
+            "ChangeSetId": "arn:aws:cloudformation:us-west-2:762817779995:changeSet/awscli-cloudformation-package-deploy-1519923334/581a17a6-bcb2-463f-b6b7-e3826b3034a8",
+            "CreationTime": "2018-02-25T18:39:48.628Z",
+            "LastUpdatedTime": "2018-03-01T16:55:42.819Z",
+            "RollbackConfiguration": {},
+            "StackStatus": "UPDATE_COMPLETE",
+            "DisableRollback": false,
+            "NotificationARNs": [],
+            "Capabilities": [
+                "CAPABILITY_NAMED_IAM"
+            ],
+            "Outputs": [
+                {
+                    "OutputKey": "UserPool",
+                    "OutputValue": "us-west-2_cVq9iwUYc",
+                    "Description": "User pool ID"
+                },
+                {
+                    "OutputKey": "DLModelStore",
+                    "OutputValue": "dlmodelstore-762817779995",
+                    "Description": "S3 bucket for storing deep learning models"
+                },
+                {
+                    "OutputKey": "WebsiteURL",
+                    "OutputValue": "http://website-762817779995.s3-website-us-west-2.amazonaws.com",
+                    "Description": "URL for website hosted on S3"
+                },
+                {
+                    "OutputKey": "Website",
+                    "OutputValue": "website-762817779995",
+                    "Description": "S3 bucket for hosting static website"
+                },
+                {
+                    "OutputKey": "ClientId",
+                    "OutputValue": "4fucr37bgp0our0dtod0322rna",
+                    "Description": "Client id for the user pool appclient"
+                },
+                {
+                    "OutputKey": "IdentityPool",
+                    "OutputValue": "us-west-2:60fe43f2-8c12-4a62-bee7-94468308334c",
+                    "Description": "Identity pool ID"
+                },
+                {
+                    "OutputKey": "ImageStore",
+                    "OutputValue": "dlapp-imagestore-j0c54sfscgl",
+                    "Description": "S3 bucket for storing uploaded images"
+                },
+                {
+                    "OutputKey": "WebsiteBucketSecureURL",
+                    "OutputValue": "https://website-762817779995.s3.amazonaws.com",
+                    "Description": "Name of S3 bucket to hold website content"
+                },
+                {
+                    "OutputKey": "LambdaExecutionRole",
+                    "OutputValue": "LambdaExecutionRole",
+                    "Description": "IAM Role for executing Lambda funtions"
+                }
+            ],
+            "Tags": [],
+            "EnableTerminationProtection": false
+        }
+    ]
+}

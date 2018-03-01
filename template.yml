@@ -3,18 +3,27 @@ Transform: AWS::Serverless-2016-10-31
 
 Resources:
 
-  ClassifyImage:
+  ProcessImage:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: classify.handler
+      Handler: process.handler
       Runtime: python2.7
-      CodeUri: dl_lambdas/
+      CodeUri: lambdas/image_processing/
       Timeout: 300
       Role: !Join ['', ['arn:aws:iam::', !Ref 'AWS::AccountId', ':role/LambdaExecutionRole']]
       Events:
         ResizeImage:
             Type: Api
             Properties:
-                Path: '/image/resize'
+                Path: '/image/process'
                 Method: post
 
+  Yolo:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Yolo
+      Handler: yolo_model.classify
+      Runtime: python2.7
+      CodeUri: lambdas/yolo/
+      Timeout: 300
+      Role: !Join ['', ['arn:aws:iam::', !Ref 'AWS::AccountId', ':role/LambdaExecutionRole']]
