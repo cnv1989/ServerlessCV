@@ -27,9 +27,3 @@ Resources:
       CodeUri: yolo/
       Timeout: 300
       Role: !Join ['', ['arn:aws:iam::', !Ref 'AWS::AccountId', ':role/LambdaExecutionRole']]
-      Events:
-        ResizeImage:
-            Type: Api
-            Properties:
-                Path: '/image/resize'
-                Method: post

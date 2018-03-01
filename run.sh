@@ -31,12 +31,38 @@ environment_reqs() {
 }
 
 lambda_reqs() {
-  rm -rf image_processing/requirements/*
-  touch image_processing/requirements/__init__.py
-  pip install -r image_processing/requirements.txt -t image_processing/requirements/ --upgrade
-  rm -rf yolo/requirements/*
-  touch yolo/requirements/__init__.py
-  pip install -r yolo/requirements.txt -t yolo/requirements/ --upgrade
+  pushd image_processing
+  rm -rf requirements/*
+  touch requirements/__init__.py
+  pip install -r requirements.txt -t requirements/ --upgrade
+  pushd requirements
+  rm -r external
+  find -name "*.so" | xargs strip
+  find -name "*.so.*" | xargs strip
+  rm -r pip
+  rm -r pip-9.0.1.dist-info
+  rm -r wheel
+  rm -r wheel-0.30.0.dist-info
+  rm easy_install.py
+  find . -name \*.pyc -delete
+  popd
+  popd
+  pushd yolo
+  rm -rf requirements/*
+  touch requirements/__init__.py
+  pip install -r requirements.txt -t requirements/ --upgrade
+  pushd requirements
+  rm -r external
+  find -name "*.so" | xargs strip
+  find -name "*.so.*" | xargs strip
+  rm -r pip
+  rm -r pip-9.0.1.dist-info
+  rm -r wheel
+  rm -r wheel-0.30.0.dist-info
+  rm easy_install.py
+  find . -name \*.pyc -delete
+  popd
+  popd
 }
 
 deploy_stack() {
