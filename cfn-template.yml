@@ -167,6 +167,7 @@ Resources:
                     - "s3:*"
                   Resource:
                     - !Join ['', ['arn:aws:s3:::', !Ref 'ImageStore', /*]]
+                    - !Join ['', ['arn:aws:s3:::', !Ref 'DLModelStore', /*]]
 
 Outputs:
   ImageStore:

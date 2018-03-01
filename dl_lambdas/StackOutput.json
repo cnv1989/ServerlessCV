@@ -3,9 +3,9 @@
         {
             "StackId": "arn:aws:cloudformation:us-west-2:762817779995:stack/DLApp/41fb3b50-1a5b-11e8-a1f4-503f20f2adae",
             "StackName": "DLApp",
-            "ChangeSetId": "arn:aws:cloudformation:us-west-2:762817779995:changeSet/awscli-cloudformation-package-deploy-1519914584/a927cc1a-25cd-4651-a579-a6ffa0fab284",
+            "ChangeSetId": "arn:aws:cloudformation:us-west-2:762817779995:changeSet/awscli-cloudformation-package-deploy-1519923334/581a17a6-bcb2-463f-b6b7-e3826b3034a8",
             "CreationTime": "2018-02-25T18:39:48.628Z",
-            "LastUpdatedTime": "2018-03-01T14:29:50.900Z",
+            "LastUpdatedTime": "2018-03-01T16:55:42.819Z",
             "RollbackConfiguration": {},
             "StackStatus": "UPDATE_COMPLETE",
             "DisableRollback": false,

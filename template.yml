@@ -3,12 +3,12 @@ Transform: AWS::Serverless-2016-10-31
 
 Resources:
 
-  ResizeImage:
+  ClassifyImage:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: process.handler
+      Handler: classify.handler
       Runtime: python2.7
-      CodeUri: image_processing/
+      CodeUri: dl_lambdas/
       Timeout: 300
       Role: !Join ['', ['arn:aws:iam::', !Ref 'AWS::AccountId', ':role/LambdaExecutionRole']]
       Events:
