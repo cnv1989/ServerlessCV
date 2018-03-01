@@ -12,7 +12,7 @@ const images = (state = [], action) => {
                 s3Url: null,
                 upload_status: STATUS.STARTED,
                 classify_status: STATUS.NOT_STARTED,
-                labels: []
+                updateImageUrl: null
             }
             return [...state, image];
         case IMAGE_ACTIONS.UPLOAD_COMPLETED:
@@ -32,7 +32,7 @@ const images = (state = [], action) => {
         case IMAGE_ACTIONS.CLASSIFY_COMPLETED:
             return state.map((image, index) => {
                 if (image.classify_status === STATUS.STARTED && image.hash === action.hash) {
-                    return {...image, classify_status: STATUS.COMPLETED}
+                    return {...image, classify_status: STATUS.COMPLETED, updateImageUrl: action.updateImageUrl}
                 }
                 return image;
             });

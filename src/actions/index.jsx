@@ -40,6 +40,18 @@ export const STATUS = {
 
 
 export const uploadFiles = dispatch => {
+    const fetchPayload = (filename) => ({
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            image_name: filename
+        })
+    });
+
 
     return files => {
         files.map((file, index) => {
@@ -69,22 +81,21 @@ export const uploadFiles = dispatch => {
                 return data;
 
             }).then( (upload_response) => {
-                console.log(upload_response);
+                const imageUrl = upload_response.Location;
                 dispatch({
                     type: IMAGE_ACTIONS.CLASSIFY_IMAGE,
                     hash: hash
                 });
-                fetch('https://hp4t5usv1a.execute-api.us-west-2.amazonaws.com/Stage/image/process', {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({
-                        image_name: file.name
-                    })
-                }).then((res) => (res.json())).then( (res_data) => {
-                    console.log(res_data);
+                fetch('https://hp4t5usv1a.execute-api.us-west-2.amazonaws.com/Stage/process_image', fetchPayload(file.name)).then((res) => {
+                    return res.text();
+                }).then((resp) => {
+                    const updateImageUrl = imageUrl.replace(file.name, 'classified-' + file.name);
+                    console.log(updateImageUrl)
+
                     dispatch({
                         type: IMAGE_ACTIONS.CLASSIFY_COMPLETED,
-                        hash: hash
+                        hash: hash,
+                        updateImageUrl: updateImageUrl
                     });
                 })
             });

@@ -48,7 +48,7 @@ const ImageThumbnail = ({image, status, stage}) => {
                     )}
                 </span>
             </div>
-            {stage === 'uploading' ? (
+            {stage === 'uploading' || stage === 'results' ? (
                 <Paper style={
                     {
                         height: 100,
@@ -57,7 +57,7 @@ const ImageThumbnail = ({image, status, stage}) => {
                         display: 'inline-block',
                     }
                 }>
-                    <img src={image.file.preview} style={{height: 400}}/>
+                    <img src={stage === 'uploading' ? image.file.preview : image.updateImageUrl} style={{height: 400}}/>
                 </Paper>
             ):
             null}
@@ -69,7 +69,7 @@ const ImageThumbnail = ({image, status, stage}) => {
 const Stage = (props) => (
     <div>
         {props.images.map((image, index) => (
-            <ImageThumbnail key={index} image={image} status={image[props.status]} stage={props.stage}/>
+            <ImageThumbnail key={index} image={image} status={props.status !== 'completed' ? image[props.status]: STATUS.COMPLETED} stage={props.stage}/>
         ))}
     </div>
 );

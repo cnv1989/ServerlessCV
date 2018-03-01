@@ -83,6 +83,7 @@ def handler(event, context):
 
     image.save(image_output_path, quality=90)
     s3_client.upload_file(image_output_path, S3_BUCKET, out_image_name)
+    s3_client.put_object_acl(Bucket=S3_BUCKET, Key=out_image_name, ACL='public-read')
     return {
         'statusCode': 200,
         'body': json.dumps({
