@@ -1,2 +1,1 @@
-boto3==1.5.36
 tensorflow==1.5.0
