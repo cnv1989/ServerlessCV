@@ -16,7 +16,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Join ['-', ['website', !Ref 'AWS::AccountId']]
-      AccessControl: PublicRead
+      # AccessControl: PublicRead
       WebsiteConfiguration:
         IndexDocument: index.html
 
@@ -175,8 +175,12 @@ Resources:
                   Resource:
                     - !Join ['', ['arn:aws:s3:::', !Ref 'ImageStore', /*]]
                     - !Join ['', ['arn:aws:s3:::', !Ref 'DLModelStore', /*]]
+                    - !Join ['', ['arn:aws:s3:::', !Ref 'LambdaCodeStore', /*]]
 
 Outputs:
+  LambdaCodeStore:
+    Description: "S3 bucket for storing lambda code"
+    Value: !Ref LambdaCodeStore
   ImageStore:
     Description: "S3 bucket for storing uploaded images"
     Value: !Ref ImageStore

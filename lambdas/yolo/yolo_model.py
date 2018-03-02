@@ -1,11 +1,8 @@
-import sys
-sys.path.insert(0,'./requirements')
-
 import boto3
 import json
-import numpy as np
 import os
-import tensorflow as tf
+import sys
+import zipfile
 
 
 s3 = boto3.resource('s3')
@@ -17,6 +14,8 @@ S3_BUCKET = list(filter(
     ))[0]["OutputValue"]
 
 
+# Download Model File
+
 MODEL_LOCAL_PATH = os.path.join(os.sep, 'tmp', 'yolo_tf.pb')
 
 DL_S3_BUCKET = list(filter(
@@ -25,6 +24,16 @@ DL_S3_BUCKET = list(filter(
     ))[0]["OutputValue"]
 
 s3.Bucket(DL_S3_BUCKET).download_file('yolo_tf.pb', MODEL_LOCAL_PATH)
+
+REQ_LOCAL_PATH = os.path.join(os.sep, 'tmp', 'requirements')
+zip_ref = zipfile.ZipFile('requirements.zip', 'r')
+zip_ref.extractall(REQ_LOCAL_PATH)
+zip_ref.close()
+sys.path.insert(0, REQ_LOCAL_PATH)
+
+
+import numpy as np
+import tensorflow as tf
 
 
 def classify(event, context):

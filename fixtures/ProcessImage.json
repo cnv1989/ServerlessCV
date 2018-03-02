@@ -1,5 +1,5 @@
 {
-  "body": "{\"image_name\":\"0014.jpg\"}",
+  "body": "{\"image_name\":\"sfmarathon.jpg\"}",
   "resource": "/{proxy+}",
   "requestContext": {
     "resourceId": "123456",

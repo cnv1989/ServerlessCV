@@ -52,14 +52,9 @@ lambda_reqs() {
     if [ -d "google" ]; then
       touch google/__init__.py
     fi
-    if [ -d "tensorboard" ]; then
-      rm -rf tensorboard
-      rm rm -rf contrib
-      rm include/unsupported
-      rm examples
-      rm tensorflow_tensorboard-0.4.0rc3.dist-info
-    fi
+    zip -r ../requirements.zip .
     popd
+    rm -rf requirements
     popd
   done
   popd
