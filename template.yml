@@ -18,14 +18,3 @@ Resources:
             Properties:
                 Path: '/process_image'
                 Method: post
-
-  Yolo:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: Yolo
-      Handler: yolo_model.classify
-      Runtime: python2.7
-      CodeUri: lambdas/yolo/
-      Timeout: 300
-      MemorySize: 3008
-      Role: !Join ['', ['arn:aws:iam::', !Ref 'AWS::AccountId', ':role/LambdaExecutionRole']]

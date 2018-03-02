@@ -31,7 +31,7 @@ environment_reqs() {
   env/bin/pip install -r env_requirements.txt --upgrade
 }
 
-LAMBDA_DIRS="image_processing yolo"
+LAMBDA_DIRS="image_processing"
 
 lambda_reqs() {
   pushd lambdas
