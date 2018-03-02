@@ -10,3 +10,4 @@ yolo/requirements/*
 ~!iyolo/requirements/__init__.py
 *.pb
 requirements.zip
+swagger-export.yml

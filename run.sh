@@ -13,8 +13,10 @@ build_lambda() {
 deploy_lambdas() {
   AWS_ACCOUNT_ID=`env/bin/aws sts get-caller-identity --output text --query 'Account'`
   S3_BUCKET="lambdacodestore-$AWS_ACCOUNT_ID"
-  env/bin/aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template lambda-template-export.yml
-  env/bin/aws cloudformation deploy --template lambda-template-export.yml --stack-name DLAppLambdas --capabilities CAPABILITY_IAM
+  AWS_REGION='us-west-2'
+  sed "s/region_placeholder/$AWS_REGION/g" 'swagger.yml' | sed "s/account_placeholder/$AWS_ACCOUNT_ID/g" > swagger-export.yml
+  # env/bin/aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template lambda-template-export.yml
+  # env/bin/aws cloudformation deploy --template lambda-template-export.yml --stack-name DLAppLambdas --capabilities CAPABILITY_IAM
 }
 
 node_reqs() {

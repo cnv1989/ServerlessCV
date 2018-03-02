@@ -3,6 +3,14 @@ Transform: AWS::Serverless-2016-10-31
 
 Resources:
 
+  ProcessImageApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      DefinitionUri: swagger-export.yml
+      StageName: Prod
+      Variables:
+        ProcessImage: !Ref ProcessImage
+
   ProcessImage:
     Type: AWS::Serverless::Function
     Properties:
@@ -16,5 +24,6 @@ Resources:
         ProcessImage:
             Type: Api
             Properties:
+                RestApiId: !Ref ProcessImageApi
                 Path: '/process_image'
                 Method: post
