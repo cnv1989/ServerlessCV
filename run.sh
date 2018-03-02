@@ -10,7 +10,7 @@ build_lambda() {
   docker-compose up && docker-compose down
 }
 
-deploy_lambda() {
+deploy_lambdas() {
   AWS_ACCOUNT_ID=`env/bin/aws sts get-caller-identity --output text --query 'Account'`
   S3_BUCKET="lambdacodestore-$AWS_ACCOUNT_ID"
   env/bin/aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template lambda-template-export.yml
@@ -84,7 +84,8 @@ deploy_website() {
 
 deploy() {
   deploy_stack
-  deploy_lambda
+  deploy_models
+  deploy_lambdas
   deploy_website
 }
 
@@ -100,8 +101,8 @@ case $1 in
   deploy_stack)
     deploy_stack
     ;;
-  deploy_lambda)
-    deploy_lambda
+  deploy_lambdas)
+    deploy_lambdas
     ;;
   deploy_website)
     deploy_website
@@ -109,11 +110,11 @@ case $1 in
   deploy_models)
     deploy_models
     ;;
-  lambda_reqs)
-    lambda_reqs
-    ;;
   build_lambda)
     build_lambda
+    ;;
+  build_website)
+    build_website
     ;;
   setup)
     setup
@@ -122,5 +123,5 @@ case $1 in
     venv
     ;;
   *)
-    echo "Usage: $0 {venv|setup|deploy_website|deploy_lambda|deploy_stack}"
+    echo "Usage: $0 {venv|setup|deploy_website|deploy_lambdas|deploy_stack|build_website|build_lambdas|build_stack}"
 esac
