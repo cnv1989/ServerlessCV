@@ -16,9 +16,24 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Join ['-', ['website', !Ref 'AWS::AccountId']]
-      # AccessControl: PublicRead
+      AccessControl: PublicRead
       WebsiteConfiguration:
         IndexDocument: index.html
+
+  # WebsiteBucketPolicy:
+  #   Type: AWS::S3::BucketPolicy
+  #   Properties:
+  #     Bucket:
+  #       Ref: Website
+  #     PolicyDocument:
+  #       Statement:
+  #         - Action: ['s3:GetObject']
+  #           Effect: Allow
+  #           Resource: !Join ['', ['arn:aws:s3:::', !Ref 'Website', '/*']]
+  #           Principal: "*"
+  #           Condition:
+  #             IpAddress:
+  #               "aws:SourceIp": ["xxx.xxx.xxx.0/24"]
 
   LambdaCodeStore:
     Type: AWS::S3::Bucket
