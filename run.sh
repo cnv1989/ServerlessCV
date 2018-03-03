@@ -15,8 +15,8 @@ deploy_lambdas() {
   S3_BUCKET="lambdacodestore-$AWS_ACCOUNT_ID"
   AWS_REGION='us-west-2'
   sed "s/region_placeholder/$AWS_REGION/g" 'swagger.yml' | sed "s/account_placeholder/$AWS_ACCOUNT_ID/g" > swagger-export.yml
-  # env/bin/aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template lambda-template-export.yml
-  # env/bin/aws cloudformation deploy --template lambda-template-export.yml --stack-name DLAppLambdas --capabilities CAPABILITY_IAM
+  env/bin/aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template lambda-template-export.yml
+  env/bin/aws cloudformation deploy --template lambda-template-export.yml --stack-name DLAppLambdas --capabilities CAPABILITY_IAM
 }
 
 node_reqs() {

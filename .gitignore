@@ -11,3 +11,4 @@ yolo/requirements/*
 *.pb
 requirements.zip
 swagger-export.yml
+StackOutput.json
