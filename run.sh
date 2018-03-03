@@ -6,7 +6,7 @@ venv() {
   virtualenv -p python3 env
 }
 
-build_lambda() {
+build_lambdas() {
   docker-compose up && docker-compose down
 }
 
@@ -96,6 +96,10 @@ setup() {
   environment_reqs
 }
 
+aws_config() {
+  env/bin/aws configure
+}
+
 case $1 in
   deploy)
     deploy
@@ -112,14 +116,17 @@ case $1 in
   deploy_models)
     deploy_models
     ;;
-  build_lambda)
-    build_lambda
+  build_lambdas)
+    build_lambdas
     ;;
   build_website)
     build_website
     ;;
   lambda_reqs)
     lambda_reqs
+    ;;
+  aws_config)
+    aws_config
     ;;
   setup)
     setup
@@ -128,5 +135,5 @@ case $1 in
     venv
     ;;
   *)
-    echo "Usage: $0 {venv|setup|deploy_website|deploy_lambdas|deploy_stack|build_website|build_lambdas|build_stack}"
+    echo "Usage: $0 {venv|setup|deploy_website|deploy_lambdas|deploy_stack|build_website|build_lambdas|build_stack|aws_config}"
 esac

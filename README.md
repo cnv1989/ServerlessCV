@@ -33,34 +33,63 @@ You can leverage this package and its packages to build your own pipeline using 
 
 ## Setup Instructions
 
-1. Copy/Download the model(s) into [/models](/models) directory.
+1. Setup `virtualenv` and install `node_modules`
 ```bash
-    wget https://www.dropbox.com/s/h8ywy9lp8siw0ml/yolo_tf.pb -P models/
+    bash run.sh setup
 ```
-2. Deploy the entire stack
+
+2. Create IAM user on AWS with admin access and use the accesskey and secret
+```
+    bash run.sh aws_config
+```
+
+3. Deploy the entire stack
 ```bash
     bash run.sh deploy
 ```
 
+4. Copy/Download the model(s) into [/models](/models) directory.
+```bash
+    wget https://www.dropbox.com/s/h8ywy9lp8siw0ml/yolo_tf.pb -P models/
+```
+
 ### OR
 
-2. Deploy the basic stack containing S3, Cognito and IAM.
+4. Deploy the basic stack containing S3, Cognito and IAM.
 ```bash
     bash run.sh deploy_stack
 ```
 
-3. Upload model(s) to S3 bucket.
+5. Upload model(s) to S3 bucket.
 ```bash
     bash run.sh deploy_model
 ```
 
-4. Build and deploy static assest i.e entire frontend built using React
+6. Build and deploy static assest i.e entire frontend built using React
 ```bash
     bash run.sh deploy_website
 ```
 
-5. Build and deploy lambdas
+7. Build and deploy lambdas
 ```bash
     bash run.sh deploy_lambdas
 ```
 
+
+## Development & Testing
+
+* Follow the first 3 steps from setup instructions.
+
+* Run the local node server locally.
+```
+    npm run watch
+```
+
+* Open `http://localhost:3000/` in the browser
+
+* Drop images in the application to upload them to S3.
+
+* Once the images are in S3 you can use `sam local` to test lambda functions.
+```
+    npm run sam local invoke ProcessImage -- --event fixtures/ProcessImage.json
+```
