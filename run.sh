@@ -17,6 +17,10 @@ deploy_lambdas() {
   sed "s/region_placeholder/$AWS_REGION/g" 'swagger.yml' | sed "s/account_placeholder/$AWS_ACCOUNT_ID/g" > swagger-export.yml
   env/bin/aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template lambda-template-export.yml
   env/bin/aws cloudformation deploy --template lambda-template-export.yml --stack-name DLAppLambdas --capabilities CAPABILITY_IAM
+  for dir in $LAMBDA_DIRS
+  do
+    env/bin/aws cloudformation describe-stacks --stack-name DLAppLambdas > lambdas/$dir/LambdaOutput.json
+  done
 }
 
 node_reqs() {

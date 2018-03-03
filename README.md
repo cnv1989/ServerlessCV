@@ -43,15 +43,16 @@ You can leverage this package and its packages to build your own pipeline using 
     bash run.sh aws_config
 ```
 
-3. Deploy the entire stack
+3. Copy/Download the model(s) into [/models](/models) directory.
+```bash
+    wget https://www.dropbox.com/s/h8ywy9lp8siw0ml/yolo_tf.pb -P models/
+```
+
+4. Deploy the entire stack
 ```bash
     bash run.sh deploy
 ```
 
-4. Copy/Download the model(s) into [/models](/models) directory.
-```bash
-    wget https://www.dropbox.com/s/h8ywy9lp8siw0ml/yolo_tf.pb -P models/
-```
 
 ### OR
 
@@ -78,18 +79,27 @@ You can leverage this package and its packages to build your own pipeline using 
 
 ## Development & Testing
 
-* Follow the first 3 steps from setup instructions.
+* Follow the first 4 steps from setup instructions.
+
+* Start the api locally
+```
+    npm run sam local start-api
+```
+
+* Replace API_URL in [/src/actions/index.jsx](https://github.com/cnv1989/ServerlessDeeplearningWebapp/blob/master/src/actions/index.jsx#L17) with the local url.
 
 * Run the local node server locally.
 ```
     npm run watch
 ```
 
-* Open `http://localhost:3000/` in the browser
+* Open [http://localhost:3000/](http://localhost:3000/) in the browser
 
 * Drop images in the application to upload them to S3.
 
-* Once the images are in S3 you can use `sam local` to test lambda functions.
+
+* If you want to debug the function you can invoke the function locally once the images are in S3. The will generate better logs.
+
 ```
     npm run sam local invoke ProcessImage -- --event fixtures/ProcessImage.json
 ```

@@ -12,3 +12,4 @@ yolo/requirements/*
 requirements.zip
 swagger-export.yml
 StackOutput.json
+LambdaOutput.json

@@ -1,16 +1,20 @@
 import uuid4 from 'uuid4';
 import AWS from 'aws-sdk';
 import StackOutput from '../StackOutput';
+import LambdaOutput from '../LambdaOutput';
 import SHA256 from 'crypto-js/sha256';
 
 
-const getValue = key => (
-    StackOutput['Stacks'][0]['Outputs'].find(output => output.OutputKey === key).OutputValue
+const getValue = (Output, key) => (
+    Output['Stacks'][0]['Outputs'].find(output => output.OutputKey === key).OutputValue
 )
 
-const BucketName = getValue('ImageStore')
-const IdentityPoolId = getValue('IdentityPool') // 'us-west-2:7fea0e16-fe5c-4724-aa9b-cdf844591e6f'
-const Region = 'us-west-2'
+const BucketName = getValue(StackOutput, 'ImageStore');
+const IdentityPoolId = getValue(StackOutput, 'IdentityPool');
+const Region = 'us-west-2';
+const APIUrlPrefix = getValue(LambdaOutput, 'ProcessImageApi');
+
+API_URL = 'https:\/\/{0}.execute-api.{1}.amazonaws.com/Prod/process_image'.format(APIUrlPrefix, Region)
 
 AWS.config.region = Region;
 
@@ -86,7 +90,7 @@ export const uploadFiles = dispatch => {
                     type: IMAGE_ACTIONS.CLASSIFY_IMAGE,
                     hash: hash
                 });
-                fetch('https://#########.execute-api.us-west-2.amazonaws.com/Prod/process_image', fetchPayload(file.name)).then((res) => {
+                fetch(API_URL, fetchPayload(file.name)).then((res) => {
                     return res.text();
                 }).then((resp) => {
                     const updateImageUrl = imageUrl.replace(file.name, 'classified-' + file.name);

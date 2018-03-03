@@ -27,3 +27,8 @@ Resources:
                 RestApiId: !Ref ProcessImageApi
                 Path: '/process_image'
                 Method: post
+
+Outputs:
+  ProcessImageApi:
+    Description: "API Endpoint for ProcessImageApi"
+    Value: !Ref ProcessImageApi
