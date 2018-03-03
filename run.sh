@@ -40,7 +40,7 @@ lambda_reqs() {
   for dir in $LAMBDA_DIRS
   do
     pushd $dir
-    rm -rf requirements/*
+    mkdir requirements
     touch requirements/__init__.py
     pip install -r requirements.txt -t requirements/ --upgrade
     pushd requirements
@@ -117,6 +117,9 @@ case $1 in
     ;;
   build_website)
     build_website
+    ;;
+  lambda_reqs)
+    lambda_reqs
     ;;
   setup)
     setup
