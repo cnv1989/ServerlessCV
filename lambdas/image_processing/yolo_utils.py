@@ -167,15 +167,13 @@ def get_boxes(output_layer, anchors, classes, image_shape=(720., 1280.)):
     return scores, boxes, classes
 
 
-def load_graph(model_file):
+def load_graph(filestream):
     tf.reset_default_graph()
 
     graph = tf.Graph()
     graph_def = tf.GraphDef()
 
-
-    with open(model_file, "rb") as f:
-        graph_def.ParseFromString(f.read())
+    graph_def.ParseFromString(filestream.read())
 
     _ = tf.import_graph_def(graph_def)
 

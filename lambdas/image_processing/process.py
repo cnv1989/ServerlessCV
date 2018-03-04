@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import zipfile
+from datetime import datetime, timedelta
 
 
 logger = logging.getLogger(__name__)
@@ -48,11 +49,13 @@ S3_BUCKET = list(filter(
 def handler(event, context):
     from yolo_utils import draw_boxes, eval_image, generate_colors, preprocess_image, load_graph
 
-    # Download Model File
-    if not os.path.isdir(MODEL_LOCAL_PATH):
-        s3.Bucket(DL_S3_BUCKET).download_file('yolo_tf.pb', MODEL_LOCAL_PATH)
-    load_graph(MODEL_LOCAL_PATH)
-    os.remove(MODEL_LOCAL_PATH)
+    file_stream = io.BytesIO()
+    bucket = s3.Bucket(DL_S3_BUCKET)
+    model_obj = bucket.Object('yolo_tf.pb')
+    model_obj.download_fileobj(file_stream)
+    file_stream.seek(0)
+    load_graph(file_stream)
+    file_stream.close()
 
 
     bucket = s3.Bucket(S3_BUCKET)
@@ -74,7 +77,8 @@ def handler(event, context):
     file_stream = io.BytesIO()
     image.save(file_stream, format=image.format, quality=90)
     file_stream.seek(0)
-    s3_client.put_object(Body=file_stream, Bucket=S3_BUCKET, Key=out_image_name, ACL='public-read')
+    expiration = datetime.now() + timedelta(minutes=5)
+    s3_client.put_object(Body=file_stream, Bucket=S3_BUCKET, Key=out_image_name, ACL='public-read', Expires=expiration)
     file_stream.close()
     return {
         'statusCode': 200,
