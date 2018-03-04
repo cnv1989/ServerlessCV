@@ -127,7 +127,7 @@ def boxes_to_corners(box_centers, box_dims):
     ], axis=-1)
 
 
-def filter_boxes(box_confidence, boxes, box_class_probs, threshold=0.6):
+def filter_boxes(box_confidence, boxes, box_class_probs, threshold=0.4):
     box_scores = tf.multiply(box_confidence, box_class_probs)
     box_classes = tf.argmax(box_scores, axis=-1)
     box_class_scores = tf.reduce_max(box_scores, axis=-1)
@@ -138,7 +138,7 @@ def filter_boxes(box_confidence, boxes, box_class_probs, threshold=0.6):
     return scores, boxes, classes
 
 
-def non_max_suppression(scores, boxes, classes, max_boxes=10, iou_threshold=0.5):
+def non_max_suppression(scores, boxes, classes, max_boxes=10, iou_threshold=0.3):
     max_boxes_tensor = tf.Variable(max_boxes, dtype='int32')     # tensor to be used in tf.image.non_max_suppression()
     nms_indices = tf.image.non_max_suppression(boxes, scores, max_boxes_tensor, iou_threshold)
     scores = tf.gather(scores, nms_indices)
@@ -168,15 +168,16 @@ def get_boxes(output_layer, anchors, classes, image_shape=(720., 1280.)):
 
 
 def load_graph(model_file):
+    tf.reset_default_graph()
+
     graph = tf.Graph()
     graph_def = tf.GraphDef()
 
+
     with open(model_file, "rb") as f:
         graph_def.ParseFromString(f.read())
-    with graph.as_default():
-        tf.import_graph_def(graph_def)
 
-    return graph
+    _ = tf.import_graph_def(graph_def)
 
 
 def eval_image(image_data, image_size):
@@ -184,7 +185,7 @@ def eval_image(image_data, image_size):
     obj_classes = list(map(lambda cls: cls.strip(), obj_classes))
     anchors = [[0.57273, 0.677385], [1.87446, 2.06253], [3.33843, 5.47434], [7.88282, 3.52778], [9.77052, 9.16828]]
 
-    graph = load_graph(MODEL_LOCAL_PATH)
+    graph = tf.get_default_graph()
 
     with graph.as_default():
         input_name = "import/" + "input_1"

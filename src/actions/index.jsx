@@ -19,6 +19,10 @@ const API_URL = 'https:\/\/' + APIUrlPrefix + '.execute-api.' + Region + '.amazo
 
 const generateImageUrl = imageName => ('https:\/\/' + BucketName + '.s3.amazonaws.com/' + imageName);
 
+const getHashName = (file, hash) => {
+    const ext = file.name.split('.').pop();
+    return hash + '.' + ext;
+}
 
 AWS.config.region = Region;
 
@@ -83,7 +87,7 @@ const checkImage = ({img, file}) => new Promise((resolve, reject) => {
 
 const uploadFileToS3 = ({file, hash, dispatch}) => new Promise((resolve, reject) => {
     const params = {
-        Key: file.name,
+        Key: getHashName(file, hash),
         Body: file
     };
 
@@ -108,7 +112,7 @@ const classifyImage = ({file, hash, data, dispatch}) => {
         type: IMAGE_ACTIONS.CLASSIFY_IMAGE,
         hash: hash
     });
-    return fetch(API_URL, generatePayload(file.name));
+    return fetch(API_URL, generatePayload(getHashName(file, hash)));
 };
 
 export const uploadFiles = dispatch => {

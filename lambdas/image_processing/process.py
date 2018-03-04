@@ -18,17 +18,12 @@ S3_BUCKET = list(filter(
         json.load(open('./StackOutput.json'))["Stacks"][0]["Outputs"]
     ))[0]["OutputValue"]
 
-
-# Download Model File
-
 MODEL_LOCAL_PATH = os.path.join(os.sep, 'tmp', 'yolo_tf.pb')
 
 DL_S3_BUCKET = list(filter(
         lambda output: output.get('OutputKey') == 'DLModelStore',
         json.load(open('./StackOutput.json'))["Stacks"][0]["Outputs"]
     ))[0]["OutputValue"]
-if not os.path.isdir(MODEL_LOCAL_PATH):
-    s3.Bucket(DL_S3_BUCKET).download_file('yolo_tf.pb', MODEL_LOCAL_PATH)
 
 REQ_LOCAL_PATH = os.path.join(os.sep, 'tmp', 'requirements')
 
@@ -51,7 +46,14 @@ S3_BUCKET = list(filter(
 
 
 def handler(event, context):
-    from yolo_utils import draw_boxes, eval_image, generate_colors, preprocess_image
+    from yolo_utils import draw_boxes, eval_image, generate_colors, preprocess_image, load_graph
+
+    # Download Model File
+    if not os.path.isdir(MODEL_LOCAL_PATH):
+        s3.Bucket(DL_S3_BUCKET).download_file('yolo_tf.pb', MODEL_LOCAL_PATH)
+    load_graph(MODEL_LOCAL_PATH)
+    os.remove(MODEL_LOCAL_PATH)
+
 
     bucket = s3.Bucket(S3_BUCKET)
     image_name = json.loads(event.get('body'))["image_name"]
