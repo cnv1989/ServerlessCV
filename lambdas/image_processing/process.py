@@ -1,4 +1,3 @@
-import shutil
 import boto3
 import io
 import json
@@ -28,14 +27,16 @@ DL_S3_BUCKET = list(filter(
         lambda output: output.get('OutputKey') == 'DLModelStore',
         json.load(open('./StackOutput.json'))["Stacks"][0]["Outputs"]
     ))[0]["OutputValue"]
-
-s3.Bucket(DL_S3_BUCKET).download_file('yolo_tf.pb', MODEL_LOCAL_PATH)
+if not os.path.isdir(MODEL_LOCAL_PATH):
+    s3.Bucket(DL_S3_BUCKET).download_file('yolo_tf.pb', MODEL_LOCAL_PATH)
 
 REQ_LOCAL_PATH = os.path.join(os.sep, 'tmp', 'requirements')
-zip_ref = zipfile.ZipFile('requirements.zip', 'r')
-zip_ref.extractall(REQ_LOCAL_PATH)
-zip_ref.close()
-sys.path.insert(0, REQ_LOCAL_PATH)
+
+if not os.path.isdir(REQ_LOCAL_PATH):
+    zip_ref = zipfile.ZipFile('requirements.zip', 'r')
+    zip_ref.extractall(REQ_LOCAL_PATH)
+    zip_ref.close()
+    sys.path.insert(0, REQ_LOCAL_PATH)
 
 
 boto3.setup_default_session(region_name='us-west-2')
@@ -72,9 +73,7 @@ def handler(event, context):
     s3_client.upload_file(image_output_path, S3_BUCKET, out_image_name)
     s3_client.put_object_acl(Bucket=S3_BUCKET, Key=out_image_name, ACL='public-read')
 
-    # Cleam up temp
-    shutil.rmtree(REQ_LOCAL_PATH)
-    os.remove(MODEL_LOCAL_PATH)
+    os.remove(image_output_path)
 
     return {
         'statusCode': 200,

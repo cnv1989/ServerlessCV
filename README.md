@@ -115,3 +115,9 @@ You can leverage this package and its packages to build your own pipeline using 
 ## Webpage
 
 ![Webpage](/readme-images/website.png)
+
+
+## Lambda Limits
+
+* Code Size: 261 Mb
+* Persistant Storage: 512 Mb
