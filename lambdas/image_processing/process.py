@@ -1,3 +1,4 @@
+import shutil
 import boto3
 import io
 import json
@@ -70,6 +71,10 @@ def handler(event, context):
     image.save(image_output_path, quality=90)
     s3_client.upload_file(image_output_path, S3_BUCKET, out_image_name)
     s3_client.put_object_acl(Bucket=S3_BUCKET, Key=out_image_name, ACL='public-read')
+
+    # Cleam up temp
+    shutil.rmtree(REQ_LOCAL_PATH)
+    os.remove(MODEL_LOCAL_PATH)
 
     return {
         'statusCode': 200,
