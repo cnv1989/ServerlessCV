@@ -17,6 +17,9 @@ const APIUrlPrefix = getValue(LambdaOutput, 'ProcessImageApi');
 const API_URL = 'https:\/\/' + APIUrlPrefix + '.execute-api.' + Region + '.amazonaws.com/Prod/process_image';
 // const API_URL = 'http:\/\/127.0.0.1:3000/process_image';
 
+const generateImageUrl = imageName => ('https:\/\/' + BucketName + '.s3.amazonaws.com/' + imageName);
+
+
 AWS.config.region = Region;
 
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -46,7 +49,7 @@ export const STATUS = {
 
 const generatePayload = (filename) => ({
     method: 'POST',
-    mode: 'no-cors',
+    mode: 'cors',
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -94,7 +97,7 @@ const uploadFileToS3 = ({file, hash, dispatch}) => new Promise((resolve, reject)
 
 });
 
-const classifyImage = ({file, hash, data, dispatch}) => new Promise((resolve, reject) => {
+const classifyImage = ({file, hash, data, dispatch}) => {
     dispatch({
         type: IMAGE_ACTIONS.UPLOAD_COMPLETED,
         hash: hash,
@@ -105,21 +108,8 @@ const classifyImage = ({file, hash, data, dispatch}) => new Promise((resolve, re
         type: IMAGE_ACTIONS.CLASSIFY_IMAGE,
         hash: hash
     });
-    fetch(API_URL, generatePayload(file.name)).then((res) => {
-        return res.text();
-    }).then((resp) => {
-        const updateImageUrl = imageUrl.replace(file.name, 'classified-' + file.name);
-
-        dispatch({
-            type: IMAGE_ACTIONS.CLASSIFY_COMPLETED,
-            hash: hash,
-            updateImageUrl: updateImageUrl
-        });
-        resolve([file, resp]);
-    }).catch((error) => {
-        reject(error)
-    })
-});
+    return fetch(API_URL, generatePayload(file.name));
+};
 
 export const uploadFiles = dispatch => {
 
@@ -142,6 +132,18 @@ export const uploadFiles = dispatch => {
             })
             .then((data) => {
                 return classifyImage({...data, hash, dispatch});
+            }).then((response) => {
+                if (!response.ok) {
+                    throw new Error("Out of lambda memory. Try again!");
+                }
+                return response.json();
+            }).then((resp) => {
+
+                dispatch({
+                    type: IMAGE_ACTIONS.CLASSIFY_COMPLETED,
+                    hash: hash,
+                    updateImageUrl: generateImageUrl(resp.classified_image_name)
+                });
             })
             .catch(errorHandler);
         });

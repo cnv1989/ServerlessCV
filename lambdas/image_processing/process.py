@@ -58,23 +58,22 @@ def handler(event, context):
     image_obj = bucket.Object(image_name)
     file_stream = io.BytesIO()
     out_image_name = "classified-{}".format(image_name)
-    image_output_path = os.path.join(os.sep, 'tmp', out_image_name)
     image_obj.download_fileobj(file_stream)
     image, image_data = preprocess_image(file_stream, model_image_size=(608, 608))
+    file_stream.close()
 
     scores, boxes, classes = eval_image(image_data, image.size)
+    with open('./coco_classes.txt', 'r') as file:
+        obj_classes = file.readlines()
 
-    obj_classes = open('./coco_classes.txt', 'r').readlines()
     obj_classes = list(map(lambda cls: cls.strip(), obj_classes))
     colors = generate_colors(obj_classes)
     draw_boxes(image, scores, boxes, classes, obj_classes, colors)
-
-    image.save(image_output_path, quality=90)
-    s3_client.upload_file(image_output_path, S3_BUCKET, out_image_name)
-    s3_client.put_object_acl(Bucket=S3_BUCKET, Key=out_image_name, ACL='public-read')
-
-    os.remove(image_output_path)
-
+    file_stream = io.BytesIO()
+    image.save(file_stream, format=image.format, quality=90)
+    file_stream.seek(0)
+    s3_client.put_object(Body=file_stream, Bucket=S3_BUCKET, Key=out_image_name, ACL='public-read')
+    file_stream.close()
     return {
         'statusCode': 200,
         'headers': {
